@@ -58,6 +58,32 @@ npm run dev
 
 Email and OAuth identity are used internally for auth/spam prevention; public UI shows only username.
 
+## Abuse + fairness rules (DB-enforced)
+
+- Title minimum: `16` chars (`max 140`).
+- Body minimum: `280` chars (`max 12000`).
+- No AI "quality gate" is required to publish.
+- Winner repetition is blocked with cooldown:
+  - Default: `90` days (`pick_daily_chosen(..., 90)`).
+  - The selected user gets `eligible_from = now() + cooldown`.
+
+If no one is eligible under cooldown, selection falls back to any user in pool so daily operation never blocks.
+
+## Daily selection + posting
+
+The SQL schema includes:
+
+- `pick_daily_chosen(p_day, p_cooldown_days)`:
+  - Picks one user for the day (random from eligible pool).
+  - Stores result in `daily_choices`.
+  - Updates cooldown state in `selection_state`.
+  - Execution is granted only to `service_role` (run from backend/Edge Function/cron).
+- `submit_monolith_post(p_day, p_title, p_body)`:
+  - Only authenticated chosen author can write/update that day post.
+  - Enforces title/body minimums.
+- `get_chosen_for_day(p_day)`:
+  - Public-safe read helper to get chosen user + username.
+
 ## Open Graph preview
 
 Meta tags are included in `src/layouts/Layout.astro`.
