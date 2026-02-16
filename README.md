@@ -84,6 +84,34 @@ The SQL schema includes:
 - `get_chosen_for_day(p_day)`:
   - Public-safe read helper to get chosen user + username.
 
+## Automation (daily pick)
+
+Included in repo:
+
+- GitHub Action: `.github/workflows/daily-pick.yml`
+- Script: `scripts/pick-daily.mjs`
+
+### Required GitHub secrets
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+The workflow runs every day at `00:05 UTC` and can also be triggered manually from GitHub Actions UI.
+
+### Manual run
+
+```bash
+SUPABASE_URL="https://YOUR_PROJECT.supabase.co" \
+SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY" \
+npm run pick:daily
+```
+
+Optional overrides:
+
+```bash
+PICK_DAY=2026-02-16 COOLDOWN_DAYS=90 npm run pick:daily
+```
+
 ## Open Graph preview
 
 Meta tags are included in `src/layouts/Layout.astro`.

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "pick:daily": "node scripts/pick-daily.mjs"
   },
   "repository": {
     "type": "git",

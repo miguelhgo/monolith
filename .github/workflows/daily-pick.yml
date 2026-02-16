@@ -1,0 +1,35 @@
+name: Daily Monolith Pick
+
+on:
+  schedule:
+    - cron: "5 0 * * *"
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Optional day override (YYYY-MM-DD)"
+        required: false
+        type: string
+      cooldown_days:
+        description: "Optional cooldown override in days"
+        required: false
+        type: string
+
+jobs:
+  pick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Pick daily chosen author
+        run: node scripts/pick-daily.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PICK_DAY: ${{ github.event.inputs.day }}
+          COOLDOWN_DAYS: ${{ github.event.inputs.cooldown_days }}
