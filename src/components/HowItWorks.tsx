@@ -18,7 +18,7 @@ export default function HowItWorks() {
         style={{
           background: "none",
           border: "1px solid #1a1a24",
-          borderRadius: "8px",
+          borderRadius: "10px",
           padding: "6px 8px",
           cursor: "pointer",
           display: "flex",
@@ -53,7 +53,7 @@ export default function HowItWorks() {
             style={{
               background: "#0e0e14",
               border: "1px solid #1a1a24",
-              borderRadius: "14px",
+              borderRadius: "12px",
               padding: "28px",
               width: "100%",
               maxWidth: "400px",

@@ -1,0 +1,42 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(190 30) rotate(34) scale(560 370)">
+      <stop stop-color="#F97316" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#F97316" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bgB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1080 40) rotate(154) scale(520 320)">
+      <stop stop-color="#F4C15D" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#F4C15D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-30%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.976 0 1 0 0 0.451 0 0 1 0 0.086 0 0 0 0.6 0" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="#08090D"/>
+  <rect width="1200" height="630" fill="url(#bgA)"/>
+  <rect width="1200" height="630" fill="url(#bgB)"/>
+
+  <g transform="translate(168 104)">
+    <g transform="translate(0 34)">
+      <polygon points="80,10 34,60 24,264 80,314" fill="#F4C15D"/>
+      <polygon points="80,10 126,60 136,264 80,314" fill="#EBAF49"/>
+      <rect x="72.5" y="22" width="15" height="274" rx="4" fill="#FFF1D0"/>
+      <rect x="66.5" y="22" width="3" height="274" rx="1.2" fill="#EA580C"/>
+      <rect x="90.5" y="22" width="3" height="274" rx="1.2" fill="#EA580C"/>
+      <rect x="80" y="14" width="2" height="282" filter="url(#glow)" fill="#F97316"/>
+    </g>
+
+    <text x="210" y="182" fill="#F6F7FB" font-family="Space Grotesk, Arial, sans-serif" font-size="96" font-weight="700" letter-spacing="-2">
+      MONOLITH
+    </text>
+    <text x="212" y="248" fill="#C7CEDB" font-family="Newsreader, Georgia, serif" font-size="44" font-weight="400">
+      One chosen voice. One day. The world listens.
+    </text>
+    <rect x="212" y="292" width="320" height="46" rx="10" fill="rgba(244,193,93,0.12)" stroke="rgba(244,193,93,0.32)"/>
+    <text x="236" y="322" fill="#F4C15D" font-family="DM Mono, monospace" font-size="22" font-weight="500" letter-spacing="0.4">
+      PRE-LAUNCH · JOIN THE POOL
+    </text>
+  </g>
+</svg>

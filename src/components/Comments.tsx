@@ -278,7 +278,7 @@ export default function Comments({ comments, isLoggedIn, onLoginClick }: Comment
               background: activeTab === tab ? "rgba(232,93,38,0.08)" : "transparent",
               border: "none",
               cursor: "pointer",
-              borderRadius: "6px",
+              borderRadius: "8px",
               fontFamily: "'DM Mono', monospace",
               fontSize: "11px",
               padding: "5px 12px",

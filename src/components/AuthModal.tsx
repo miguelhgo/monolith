@@ -27,7 +27,7 @@ export default function AuthModal({ onClose, onLogin }: Props) {
         style={{
           background: "#0e0e14",
           border: "1px solid #1a1a24",
-          borderRadius: "14px",
+          borderRadius: "12px",
           padding: "28px",
           width: "100%",
           maxWidth: "380px",
@@ -39,7 +39,7 @@ export default function AuthModal({ onClose, onLogin }: Props) {
               width: "48px",
               height: "48px",
               borderRadius: "50%",
-              background: "linear-gradient(135deg, #e85d26, #6366f1)",
+              background: "linear-gradient(135deg, #f97316, #f4c15d)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

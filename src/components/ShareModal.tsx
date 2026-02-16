@@ -6,7 +6,7 @@ export default function ShareModal() {
   const [copied, setCopied] = useState(false);
   const url = "https://themonolith.today";
   const text =
-    "Today\u2019s monolith hit different. One voice, one day, gone forever.";
+    "Today's monolith hit different. One chosen voice, one day, gone forever.";
 
   const copyLink = () => {
     navigator.clipboard?.writeText(url);
@@ -21,7 +21,7 @@ export default function ShareModal() {
         style={{
           background: "rgba(255,255,255,0.03)",
           border: "1px solid #16161e",
-          borderRadius: "6px",
+          borderRadius: "10px",
           padding: "5px 14px",
           cursor: "pointer",
           display: "flex",
@@ -64,7 +64,7 @@ export default function ShareModal() {
             style={{
               background: "#0e0e14",
               border: "1px solid #1a1a24",
-              borderRadius: "14px",
+              borderRadius: "12px",
               padding: "24px",
               width: "100%",
               maxWidth: "360px",

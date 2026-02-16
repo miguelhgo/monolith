@@ -20,7 +20,7 @@ export default function BellButton() {
         style={{
           background: notifyOn ? "rgba(232,93,38,0.1)" : "transparent",
           border: `1px solid ${notifyOn ? "rgba(232,93,38,0.2)" : "#1a1a24"}`,
-          borderRadius: "8px",
+          borderRadius: "10px",
           padding: "6px 8px",
           cursor: "pointer",
           display: "flex",
@@ -39,7 +39,7 @@ export default function BellButton() {
             right: 0,
             background: "#16161e",
             border: "1px solid #2a2a34",
-            borderRadius: "8px",
+            borderRadius: "10px",
             padding: "8px 12px",
             whiteSpace: "nowrap",
             zIndex: 10,

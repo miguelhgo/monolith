@@ -23,7 +23,7 @@ export default function LiveReaders() {
         gap: "6px",
         fontFamily: "'DM Mono', monospace",
         fontSize: "11px",
-        color: "#4a4a56",
+        color: "var(--text-secondary)",
       }}
     >
       <div

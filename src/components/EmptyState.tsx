@@ -44,7 +44,7 @@ export default function EmptyState({ isLoggedIn, onLoginClick, onNotify }: Props
           margin: "0 0 8px",
         }}
       >
-        Today's voice hasn't spoken yet
+        Today's chosen voice hasn't spoken yet
       </h2>
       <p
         style={{

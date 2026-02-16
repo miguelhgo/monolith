@@ -89,7 +89,7 @@ export default function CommentInput({ isLoggedIn, onLoginClick }: Props) {
                 commentInput.length > 0
                   ? "1px solid #e85d26"
                   : "1px solid #1a1a24",
-              borderRadius: "6px",
+              borderRadius: "10px",
               padding: "6px 20px",
               color: commentInput.length > 0 ? "#fff" : "#3a3a46",
               fontFamily: "'DM Mono', monospace",

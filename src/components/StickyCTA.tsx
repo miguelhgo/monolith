@@ -16,7 +16,8 @@ export default function StickyCTA({ onLoginClick }: Props) {
         bottom: 0,
         left: 0,
         right: 0,
-        background: "linear-gradient(180deg, rgba(8,8,12,0), #08080c 30%)",
+        background:
+          "linear-gradient(180deg, rgba(8,9,13,0), rgba(8,9,13,0.96) 38%), radial-gradient(circle at 50% 100%, rgba(249,115,22,0.1), rgba(249,115,22,0) 60%)",
         padding: "28px 20px 16px",
         zIndex: 50,
         animation: "slideUp 0.5s ease 0.8s both",
@@ -28,9 +29,9 @@ export default function StickyCTA({ onLoginClick }: Props) {
           style={{
             width: "100%",
             padding: "14px",
-            background: "linear-gradient(135deg, #e85d26, #d04f1c)",
-            border: "none",
-            borderRadius: "12px",
+            background: "#f3efe6",
+            border: "1px solid rgba(243,239,230,0.72)",
+            borderRadius: "10px",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
@@ -39,9 +40,9 @@ export default function StickyCTA({ onLoginClick }: Props) {
             fontFamily: "'Space Grotesk', sans-serif",
             fontSize: "15px",
             fontWeight: 600,
-            color: "#fff",
+            color: "#0b0d12",
             transition: "all 0.2s",
-            boxShadow: "0 4px 24px rgba(232,93,38,0.3)",
+            boxShadow: "0 10px 26px rgba(0,0,0,0.34)",
           }}
         >
           <Sparkles size={16} /> Join the lottery &mdash; {formatNum(284019)}{" "}
@@ -51,13 +52,12 @@ export default function StickyCTA({ onLoginClick }: Props) {
           style={{
             fontFamily: "'DM Mono', monospace",
             fontSize: "10px",
-            color: "#3a3a46",
+            color: "#6f788c",
             textAlign: "center",
             marginTop: "8px",
           }}
         >
-          One person, chosen at random, every day. Their words disappear in 24
-          hours.
+          One chosen voice, every day. Their words disappear in 24 hours.
         </p>
       </div>
     </div>

@@ -2,12 +2,21 @@
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
 }
 
 const {
-  title = "monolith — one voice, one day",
-  description = "One person, chosen at random, every day. Their words disappear in 24 hours.",
+  title = "monolith — one chosen voice, one day",
+  description = "One person is chosen every day. Their words disappear in 24 hours.",
+  image = "/og-image.svg",
 } = Astro.props;
+
+const fallbackSiteUrl = import.meta.env.PUBLIC_SITE_URL || "http://localhost:4321";
+const siteUrl = (Astro.site?.toString() || fallbackSiteUrl).replace(/\/$/, "");
+const pageUrl = new URL(Astro.url.pathname, `${siteUrl}/`).toString();
+const ogImage = image.startsWith("http")
+  ? image
+  : `${siteUrl}${image.startsWith("/") ? image : `/${image}`}`;
 ---
 
 <!doctype html>
@@ -17,6 +26,18 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#08080c" />
+    <link rel="canonical" href={pageUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="monolith" />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content="Monolith pre-launch" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -28,6 +49,25 @@ const {
   <body class="min-h-screen bg-mono-bg text-mono-text-primary">
     <slot />
     <style is:global>
+      :root {
+        --bg-main: #08090d;
+        --bg-panel: #0f1219;
+        --bg-chip: #10141d;
+        --border-soft: #232836;
+        --text-primary: #f6f7fb;
+        --text-secondary: #c7cedb;
+        --text-dim: #8d97ac;
+        --accent: #f97316;
+        --accent-strong: #ea580c;
+        --accent-warm: #f4c15d;
+      }
+      body {
+        background:
+          radial-gradient(1200px 700px at 10% -10%, rgba(249, 115, 22, 0.12), transparent 55%),
+          radial-gradient(900px 560px at 95% 0%, rgba(244, 193, 93, 0.08), transparent 62%),
+          var(--bg-main);
+        color: var(--text-primary);
+      }
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(12px); }
         to { opacity: 1; transform: translateY(0); }
@@ -44,10 +84,10 @@ const {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
       }
-      ::selection { background: rgba(232,93,38,0.25); }
+      ::selection { background: rgba(249, 115, 22, 0.3); }
       ::-webkit-scrollbar { width: 5px; }
       ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #1a1a24; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb { background: #252b39; border-radius: 3px; }
       textarea:focus { outline: none; }
     </style>
   </body>
