@@ -1,17 +1,20 @@
-function requireEnv(name) {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required env var: ${name}`);
-  }
-  return value;
-}
-
 function readSupabaseUrl() {
   const value = process.env.SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL;
   if (!value) {
     throw new Error("Missing required env var: SUPABASE_URL (or PUBLIC_SUPABASE_URL)");
   }
   return value.replace(/\/+$/, "");
+}
+
+function readSupabaseSecretKey() {
+  const value =
+    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!value) {
+    throw new Error(
+      "Missing required env var: SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY)"
+    );
+  }
+  return value;
 }
 
 function readCooldownDays() {
@@ -31,12 +34,12 @@ function readPickDay() {
   return raw;
 }
 
-async function callRpc(supabaseUrl, serviceRoleKey, fnName, payload) {
+async function callRpc(supabaseUrl, secretKey, fnName, payload) {
   const response = await fetch(`${supabaseUrl}/rest/v1/rpc/${fnName}`, {
     method: "POST",
     headers: {
-      apikey: serviceRoleKey,
-      authorization: `Bearer ${serviceRoleKey}`,
+      apikey: secretKey,
+      authorization: `Bearer ${secretKey}`,
       "content-type": "application/json",
     },
     body: JSON.stringify(payload),
@@ -63,20 +66,20 @@ async function callRpc(supabaseUrl, serviceRoleKey, fnName, payload) {
 }
 
 const supabaseUrl = readSupabaseUrl();
-const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+const supabaseSecretKey = readSupabaseSecretKey();
 const cooldownDays = readCooldownDays();
 const day = readPickDay();
 
 const selectedUserId = await callRpc(
   supabaseUrl,
-  serviceRoleKey,
+  supabaseSecretKey,
   "pick_daily_chosen",
   { p_day: day, p_cooldown_days: cooldownDays }
 );
 
 const chosenInfo = await callRpc(
   supabaseUrl,
-  serviceRoleKey,
+  supabaseSecretKey,
   "get_chosen_for_day",
   { p_day: day }
 );

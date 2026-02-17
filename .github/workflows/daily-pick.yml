@@ -30,6 +30,6 @@ jobs:
         run: node scripts/pick-daily.mjs
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PICK_DAY: ${{ github.event.inputs.day }}
           COOLDOWN_DAYS: ${{ github.event.inputs.cooldown_days }}

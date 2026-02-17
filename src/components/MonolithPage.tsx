@@ -561,8 +561,8 @@ export default function MonolithPage() {
                 fontSize: "11px",
               }}
             >
-              Configure PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY to
-              enable OAuth.
+              Configure PUBLIC_SUPABASE_URL and
+              PUBLIC_SUPABASE_PUBLISHABLE_KEY to enable OAuth.
             </p>
           )}
         </section>

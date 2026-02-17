@@ -44,7 +44,7 @@ npm run dev
 | Variable | Required | Description |
 | --- | --- | --- |
 | `PUBLIC_SUPABASE_URL` | yes (for auth) | Supabase project URL |
-| `PUBLIC_SUPABASE_ANON_KEY` | yes (for auth) | Supabase anon key |
+| `PUBLIC_SUPABASE_PUBLISHABLE_KEY` | yes (for auth) | Supabase publishable key |
 | `PUBLIC_LAUNCH_DATE` | no | Launch date in `YYYY-MM-DD` (default: `2026-03-31`) |
 | `PUBLIC_SITE_URL` | recommended | Public site URL used for canonical + Open Graph image URLs |
 
@@ -77,7 +77,7 @@ The SQL schema includes:
   - Picks one user for the day (random from eligible pool).
   - Stores result in `daily_choices`.
   - Updates cooldown state in `selection_state`.
-  - Execution is granted only to `service_role` (run from backend/Edge Function/cron).
+  - Execution is granted only to privileged backend key (run from backend/Edge Function/cron).
 - `submit_monolith_post(p_day, p_title, p_body)`:
   - Only authenticated chosen author can write/update that day post.
   - Enforces title/body minimums.
@@ -94,7 +94,7 @@ Included in repo:
 ### Required GitHub secrets
 
 - `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_SECRET_KEY`
 
 The workflow runs every day at `00:05 UTC` and can also be triggered manually from GitHub Actions UI.
 
@@ -102,7 +102,7 @@ The workflow runs every day at `00:05 UTC` and can also be triggered manually fr
 
 ```bash
 SUPABASE_URL="https://YOUR_PROJECT.supabase.co" \
-SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY" \
+SUPABASE_SECRET_KEY="YOUR_SECRET_KEY" \
 npm run pick:daily
 ```
 
@@ -111,6 +111,10 @@ Optional overrides:
 ```bash
 PICK_DAY=2026-02-16 COOLDOWN_DAYS=90 npm run pick:daily
 ```
+
+Legacy compatibility:
+- The script still accepts `SUPABASE_SERVICE_ROLE_KEY` as fallback.
+- Frontend still accepts `PUBLIC_SUPABASE_ANON_KEY` as fallback.
 
 ## Open Graph preview
 
