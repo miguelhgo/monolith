@@ -57,9 +57,11 @@ async function callRpc(supabaseUrl, secretKey, fnName, payload) {
   }
 
   if (!response.ok) {
-    const detail =
-      typeof parsed === "string" ? parsed : JSON.stringify(parsed ?? {});
-    throw new Error(`${fnName} failed (${response.status}): ${detail}`);
+    const error = new Error(`${fnName} failed (${response.status})`);
+    // Attach structured context for caller-specific handling.
+    error.status = response.status;
+    error.body = parsed;
+    throw error;
   }
 
   return parsed;
@@ -70,12 +72,49 @@ const supabaseSecretKey = readSupabaseSecretKey();
 const cooldownDays = readCooldownDays();
 const day = readPickDay();
 
-const selectedUserId = await callRpc(
-  supabaseUrl,
-  supabaseSecretKey,
-  "pick_daily_chosen",
-  { p_day: day, p_cooldown_days: cooldownDays }
-);
+let selectedUserId = null;
+
+try {
+  selectedUserId = await callRpc(
+    supabaseUrl,
+    supabaseSecretKey,
+    "pick_daily_chosen",
+    { p_day: day, p_cooldown_days: cooldownDays }
+  );
+} catch (error) {
+  const code =
+    error && typeof error.body === "object" && error.body !== null
+      ? error.body.code
+      : null;
+  const message =
+    error && typeof error.body === "object" && error.body !== null
+      ? error.body.message
+      : "";
+
+  if (code === "P0001" && message === "No candidates available in pool_entries") {
+    console.log(
+      JSON.stringify(
+        {
+          ok: true,
+          day,
+          cooldown_days: cooldownDays,
+          selected_user_id: null,
+          username: null,
+          skipped: "no_candidates_in_pool",
+        },
+        null,
+        2
+      )
+    );
+    process.exit(0);
+  }
+
+  const detail =
+    typeof error.body === "string"
+      ? error.body
+      : JSON.stringify(error.body ?? {});
+  throw new Error(`pick_daily_chosen failed (${error.status ?? "unknown"}): ${detail}`);
+}
 
 const chosenInfo = await callRpc(
   supabaseUrl,
