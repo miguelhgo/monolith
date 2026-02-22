@@ -7,6 +7,8 @@ import {
 } from "../lib/monolith";
 
 interface Props {
+  hasLaunched: boolean;
+  launchDate: string;
   dayLabel: string;
   chosenLoading: boolean;
   postLoading: boolean;
@@ -29,6 +31,8 @@ interface Props {
 }
 
 export default function DailyMonolithSection({
+  hasLaunched,
+  launchDate,
   dayLabel,
   chosenLoading,
   postLoading,
@@ -49,6 +53,58 @@ export default function DailyMonolithSection({
   onDraftBodyChange,
   onSubmit,
 }: Props) {
+  if (!hasLaunched) {
+    return (
+      <section
+        style={{
+          marginTop: "14px",
+          border: "1px solid var(--border-soft)",
+          borderRadius: "12px",
+          padding: "20px 16px 18px",
+          background: "#0f1219",
+        }}
+      >
+        <p
+          style={{
+            margin: "0 0 6px",
+            fontFamily: "'DM Mono', monospace",
+            textTransform: "uppercase",
+            letterSpacing: "0.8px",
+            fontSize: "10px",
+            color: "var(--accent-warm)",
+          }}
+        >
+          Monolith day · launches {launchDate} (UTC)
+        </p>
+        <h2
+          style={{
+            margin: "0 0 10px",
+            color: "var(--text-primary)",
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: "26px",
+            lineHeight: 1.1,
+            letterSpacing: "-0.4px",
+          }}
+        >
+          Today's monolith
+        </h2>
+        <p
+          style={{
+            margin: 0,
+            color: "var(--text-secondary)",
+            fontFamily: "'Newsreader', Georgia, serif",
+            fontSize: "20px",
+            lineHeight: 1.35,
+            maxWidth: "42ch",
+          }}
+        >
+          Pre-launch mode is active. Daily selection and publishing open on{" "}
+          {launchDate} (UTC).
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section
       style={{

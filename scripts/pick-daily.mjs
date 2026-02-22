@@ -1,3 +1,12 @@
+const ISO_DAY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const DEFAULT_LAUNCH_DATE = "2026-03-31";
+
+function validateIsoDay(value, envName) {
+  if (!ISO_DAY_REGEX.test(value)) {
+    throw new Error(`${envName} must use YYYY-MM-DD format`);
+  }
+}
+
 function readSupabaseUrl() {
   const value = process.env.SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL;
   if (!value) {
@@ -28,9 +37,13 @@ function readCooldownDays() {
 
 function readPickDay() {
   const raw = process.env.PICK_DAY || new Date().toISOString().slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-    throw new Error("PICK_DAY must use YYYY-MM-DD format");
-  }
+  validateIsoDay(raw, "PICK_DAY");
+  return raw;
+}
+
+function readLaunchDay() {
+  const raw = process.env.LAUNCH_DATE || DEFAULT_LAUNCH_DATE;
+  validateIsoDay(raw, "LAUNCH_DATE");
   return raw;
 }
 
@@ -71,6 +84,26 @@ const supabaseUrl = readSupabaseUrl();
 const supabaseSecretKey = readSupabaseSecretKey();
 const cooldownDays = readCooldownDays();
 const day = readPickDay();
+const launchDay = readLaunchDay();
+
+if (day < launchDay) {
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        day,
+        launch_day: launchDay,
+        cooldown_days: cooldownDays,
+        selected_user_id: null,
+        username: null,
+        skipped: "before_launch_date",
+      },
+      null,
+      2
+    )
+  );
+  process.exit(0);
+}
 
 let selectedUserId = null;
 
@@ -97,6 +130,7 @@ try {
         {
           ok: true,
           day,
+          launch_day: launchDay,
           cooldown_days: cooldownDays,
           selected_user_id: null,
           username: null,
@@ -131,6 +165,7 @@ console.log(
     {
       ok: true,
       day,
+      launch_day: launchDay,
       cooldown_days: cooldownDays,
       selected_user_id: selectedUserId,
       username: chosenRow?.username ?? null,

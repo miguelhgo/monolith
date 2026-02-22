@@ -4,28 +4,51 @@ import PrelaunchSection from "./PrelaunchSection";
 import DailyMonolithSection from "./DailyMonolithSection";
 import AuthSheetModal from "./AuthSheetModal";
 import { hasSupabaseEnv } from "../lib/supabase";
-import { DEFAULT_LAUNCH_DATE, formatLaunchDate } from "../lib/monolith";
+import {
+  DEFAULT_LAUNCH_DATE,
+  formatLaunchDate,
+  getUtcDayIso,
+  isLaunchLive,
+  normalizeLaunchDate,
+} from "../lib/monolith";
 import { useMonolithAuthPool } from "../hooks/useMonolithAuthPool";
 import { useDailyMonolith } from "../hooks/useDailyMonolith";
 
 export default function MonolithPage() {
-  const launchDate = useMemo(
-    () =>
-      formatLaunchDate(
-        import.meta.env.PUBLIC_LAUNCH_DATE?.trim() || DEFAULT_LAUNCH_DATE
-      ),
+  const launchDateIso = useMemo(
+    () => normalizeLaunchDate(import.meta.env.PUBLIC_LAUNCH_DATE || DEFAULT_LAUNCH_DATE),
     []
+  );
+  const launchDate = useMemo(
+    () => formatLaunchDate(launchDateIso),
+    [launchDateIso]
   );
 
   const [loaded, setLoaded] = useState(false);
   const [showAuthSheet, setShowAuthSheet] = useState(false);
+  const [currentUtcDayIso, setCurrentUtcDayIso] = useState(() => getUtcDayIso());
+  const hasLaunched = isLaunchLive(launchDateIso, currentUtcDayIso);
 
   const auth = useMonolithAuthPool();
-  const daily = useDailyMonolith({ sessionUserId: auth.session?.user.id });
+  const daily = useDailyMonolith({
+    sessionUserId: auth.session?.user.id,
+    enabled: hasLaunched,
+  });
 
   useEffect(() => {
     const timer = window.setTimeout(() => setLoaded(true), 50);
     return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setCurrentUtcDayIso((previous) => {
+        const next = getUtcDayIso();
+        return previous === next ? previous : next;
+      });
+    }, 15000);
+
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -103,6 +126,8 @@ export default function MonolithPage() {
         />
 
         <DailyMonolithSection
+          hasLaunched={hasLaunched}
+          launchDate={launchDate}
           dayLabel={daily.dayLabel}
           chosenLoading={daily.chosenLoading}
           postLoading={daily.postLoading}

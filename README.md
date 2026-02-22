@@ -112,6 +112,7 @@ Included in repo:
 - `SUPABASE_SECRET_KEY`
 
 The workflow runs every day at `00:05 UTC` and can also be triggered manually from GitHub Actions UI.
+The picker script is launch-gated and skips selection before `PUBLIC_LAUNCH_DATE` (default `2026-03-31`).
 
 ### Manual run
 
@@ -124,7 +125,7 @@ npm run pick:daily
 Optional overrides:
 
 ```bash
-PICK_DAY=2026-02-16 COOLDOWN_DAYS=90 npm run pick:daily
+PICK_DAY=2026-02-16 COOLDOWN_DAYS=90 LAUNCH_DATE=2026-03-31 npm run pick:daily
 ```
 
 Legacy compatibility:

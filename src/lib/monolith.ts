@@ -3,6 +3,7 @@ export const DEFAULT_WAITING = 284019;
 export const DEFAULT_LAUNCH_DATE = "2026-03-31";
 export const TITLE_MIN = 16;
 export const BODY_MIN = 280;
+const ISO_DAY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export type OAuthProvider = "google" | "github";
 
@@ -26,13 +27,24 @@ export function formatCount(value: number | null) {
 }
 
 export function formatLaunchDate(launchDateIso: string) {
-  const date = new Date(`${launchDateIso}T00:00:00`);
+  const date = new Date(`${launchDateIso}T00:00:00Z`);
   if (Number.isNaN(date.getTime())) return launchDateIso;
   return date.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
+    timeZone: "UTC",
   });
+}
+
+export function normalizeLaunchDate(value: string | null | undefined) {
+  const normalized = value?.trim() || "";
+  if (!ISO_DAY_REGEX.test(normalized)) return DEFAULT_LAUNCH_DATE;
+
+  const date = new Date(`${normalized}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return DEFAULT_LAUNCH_DATE;
+
+  return normalized;
 }
 
 export function normalizeUsername(input: string) {
@@ -49,6 +61,10 @@ export function usernameValidationMessage(username: string) {
 
 export function getUtcDayIso(date: Date = new Date()) {
   return date.toISOString().slice(0, 10);
+}
+
+export function isLaunchLive(launchDateIso: string, currentUtcDayIso: string = getUtcDayIso()) {
+  return currentUtcDayIso >= launchDateIso;
 }
 
 export function formatUtcDay(isoDay: string) {

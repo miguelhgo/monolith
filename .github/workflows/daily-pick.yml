@@ -13,6 +13,10 @@ on:
         description: "Optional cooldown override in days"
         required: false
         type: string
+      launch_date:
+        description: "Optional launch date override (YYYY-MM-DD)"
+        required: false
+        type: string
 
 jobs:
   pick:
@@ -33,3 +37,4 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PICK_DAY: ${{ github.event.inputs.day }}
           COOLDOWN_DAYS: ${{ github.event.inputs.cooldown_days }}
+          LAUNCH_DATE: ${{ github.event.inputs.launch_date }}

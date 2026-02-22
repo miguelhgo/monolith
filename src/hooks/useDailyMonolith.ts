@@ -12,16 +12,17 @@ import {
 
 interface UseDailyMonolithArgs {
   sessionUserId?: string | null;
+  enabled?: boolean;
 }
 
-export function useDailyMonolith({ sessionUserId }: UseDailyMonolithArgs) {
+export function useDailyMonolith({ sessionUserId, enabled = true }: UseDailyMonolithArgs) {
   const [clientUtcDayIso, setClientUtcDayIso] = useState(() => getUtcDayIso());
   const [chosenInfo, setChosenInfo] = useState<ChosenInfo | null>(null);
-  const [chosenLoading, setChosenLoading] = useState(Boolean(supabase));
+  const [chosenLoading, setChosenLoading] = useState(Boolean(supabase && enabled));
   const [chosenError, setChosenError] = useState<string | null>(null);
 
   const [dailyPost, setDailyPost] = useState<DailyPost | null>(null);
-  const [postLoading, setPostLoading] = useState(Boolean(supabase));
+  const [postLoading, setPostLoading] = useState(Boolean(supabase && enabled));
   const [postError, setPostError] = useState<string | null>(null);
 
   const [draftTitle, setDraftTitle] = useState("");
@@ -63,7 +64,7 @@ export function useDailyMonolith({ sessionUserId }: UseDailyMonolithArgs) {
   }, [chosenInfo?.day, sessionUserId]);
 
   const refreshDailySnapshot = useCallback(async () => {
-    if (!supabase) return;
+    if (!supabase || !enabled) return;
 
     const requestId = snapshotRequestId.current + 1;
     snapshotRequestId.current = requestId;
@@ -121,10 +122,10 @@ export function useDailyMonolith({ sessionUserId }: UseDailyMonolithArgs) {
       setChosenLoading(false);
       setPostLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
-    if (!supabase) {
+    if (!supabase || !enabled) {
       setChosenLoading(false);
       setPostLoading(false);
       return;
@@ -133,9 +134,21 @@ export function useDailyMonolith({ sessionUserId }: UseDailyMonolithArgs) {
     refreshDailySnapshot();
     const timer = window.setInterval(refreshDailySnapshot, 30000);
     return () => window.clearInterval(timer);
-  }, [refreshDailySnapshot, sessionUserId]);
+  }, [enabled, refreshDailySnapshot, sessionUserId]);
+
+  useEffect(() => {
+    if (enabled) return;
+    setChosenInfo(null);
+    setDailyPost(null);
+    setChosenError(null);
+    setPostError(null);
+    setPostSaveError(null);
+    setPostSaveSuccess(null);
+    setPostSaving(false);
+  }, [enabled]);
 
   const isCurrentUserChosen = Boolean(
+    enabled &&
     sessionUserId && chosenInfo?.user_id && sessionUserId === chosenInfo.user_id
   );
 
@@ -161,7 +174,7 @@ export function useDailyMonolith({ sessionUserId }: UseDailyMonolithArgs) {
   }, []);
 
   const submitDailyPost = useCallback(async () => {
-    if (!supabase || !sessionUserId || !isCurrentUserChosen) return;
+    if (!enabled || !supabase || !sessionUserId || !isCurrentUserChosen) return;
 
     const title = draftTitle.trim();
     const body = draftBody.trim();
@@ -211,12 +224,14 @@ export function useDailyMonolith({ sessionUserId }: UseDailyMonolithArgs) {
     dailyPost,
     draftBody,
     draftTitle,
+    enabled,
     isCurrentUserChosen,
     refreshDailySnapshot,
     sessionUserId,
   ]);
 
   const canSubmit =
+    enabled &&
     !postSaving &&
     draftTitle.trim().length >= TITLE_MIN &&
     draftBody.trim().length >= BODY_MIN;
