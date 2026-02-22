@@ -26,7 +26,7 @@ npm install
 cp .env.example .env
 ```
 
-3. Create a Supabase project and run `supabase/schema.sql` in SQL Editor.
+3. Create a Supabase project and apply `supabase/migrations/*.sql` in filename order.
 4. In Supabase Auth, enable OAuth providers:
 - Google
 - GitHub
@@ -48,6 +48,20 @@ npm run dev
 | `PUBLIC_LAUNCH_DATE` | no | Launch date in `YYYY-MM-DD` (default: `2026-03-31`) |
 | `PUBLIC_SITE_URL` | recommended | Public site URL used for canonical + Open Graph image URLs |
 
+## Database migrations
+
+- Canonical source: `supabase/migrations/*.sql`
+- Snapshot reference: `supabase/schema.sql` (legacy snapshot for inspection/export)
+
+For new environments, apply all migration files in filename order.
+For existing environments originally initialized from `supabase/schema.sql`,
+do not re-run the baseline migration; apply only missing incremental files after it.
+
+Current migration list:
+
+- `supabase/migrations/20260216090000_initial_schema.sql`
+- `supabase/migrations/20260218163000_username_immutable.sql`
+
 ## Auth and username flow
 
 1. User clicks `Join the speaker pool`.
@@ -57,6 +71,7 @@ npm run dev
 5. Landing shows: `You're #X in the pool`.
 
 Email and OAuth identity are used internally for auth/spam prevention; public UI shows only username.
+Username is immutable once set (DB-enforced trigger).
 
 ## Abuse + fairness rules (DB-enforced)
 

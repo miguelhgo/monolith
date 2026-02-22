@@ -1,5 +1,5 @@
--- Legacy schema snapshot kept for reference.
--- Canonical change history lives in supabase/migrations/*.sql.
+-- Baseline schema migration.
+-- Apply on fresh environments before incremental migrations.
 
 create extension if not exists citext;
 
@@ -25,22 +25,6 @@ create trigger trg_profiles_updated_at
 before update on public.profiles
 for each row execute procedure public.set_updated_at();
 
-create or replace function public.prevent_username_change()
-returns trigger
-language plpgsql
-as $$
-begin
-  if old.username is distinct from new.username then
-    raise exception 'Username is immutable once set';
-  end if;
-  return new;
-end;
-$$;
-
-drop trigger if exists trg_profiles_username_immutable on public.profiles;
-create trigger trg_profiles_username_immutable
-before update on public.profiles
-for each row execute procedure public.prevent_username_change();
 
 create sequence if not exists public.pool_position_seq
   as bigint
