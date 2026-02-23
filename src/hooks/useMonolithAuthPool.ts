@@ -283,8 +283,13 @@ export function useMonolithAuthPool() {
   const showUsernameStep = Boolean(session && !username);
   const showReadyState = Boolean(session && username);
   const isBusy = useMemo(
-    () => !authReady || profileLoading || poolLoading,
-    [authReady, profileLoading, poolLoading]
+    () =>
+      profileLoading ||
+      poolLoading ||
+      usernameSaving ||
+      oauthLoading !== null ||
+      (Boolean(session) && !authReady),
+    [authReady, oauthLoading, poolLoading, profileLoading, session, usernameSaving]
   );
 
   return {

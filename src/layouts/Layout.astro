@@ -44,6 +44,58 @@ const ogImage = image.startsWith("http")
       href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script is:inline>
+      (() => {
+        const RELOAD_THROTTLE_KEY = "__monolith_dynamic_import_reload_ts__";
+
+        const shouldReload = () => {
+          try {
+            const now = Date.now();
+            const lastRaw = sessionStorage.getItem(RELOAD_THROTTLE_KEY);
+            const last = lastRaw ? Number(lastRaw) : 0;
+            if (Number.isFinite(last) && now - last < 10000) return false;
+            sessionStorage.setItem(RELOAD_THROTTLE_KEY, String(now));
+            return true;
+          } catch {
+            return true;
+          }
+        };
+
+        const isDynamicImportError = (value) => {
+          const message = String(value ?? "");
+          return (
+            message.includes("Failed to fetch dynamically imported module") ||
+            message.includes("Importing a module script failed") ||
+            message.includes("Outdated Optimize Dep")
+          );
+        };
+
+        window.addEventListener("vite:preloadError", (event) => {
+          event?.preventDefault?.();
+          if (!shouldReload()) return;
+          window.location.reload();
+        });
+
+        const reloadIfNeeded = (value) => {
+          if (!isDynamicImportError(value)) return;
+          if (!shouldReload()) return;
+          window.location.reload();
+        };
+
+        window.addEventListener("error", (event) => {
+          reloadIfNeeded(event?.message || event?.error?.message);
+        });
+
+        window.addEventListener("unhandledrejection", (event) => {
+          const reason = event?.reason;
+          if (typeof reason === "string") {
+            reloadIfNeeded(reason);
+            return;
+          }
+          reloadIfNeeded(reason?.message);
+        });
+      })();
+    </script>
     <title>{title}</title>
   </head>
   <body class="min-h-screen bg-mono-bg text-mono-text-primary">
