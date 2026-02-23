@@ -184,9 +184,17 @@ set search_path = public
 as $$
 declare
   v_user_id uuid;
+  v_launch_day date := coalesce(
+    nullif(current_setting('app.settings.launch_date', true), '')::date,
+    date '2026-03-31'
+  );
 begin
   if p_cooldown_days < 1 or p_cooldown_days > 3650 then
     raise exception 'cooldown_days must be between 1 and 3650';
+  end if;
+
+  if p_day < v_launch_day then
+    raise exception 'Daily pick is locked before launch date %', v_launch_day;
   end if;
 
   perform pg_advisory_xact_lock(94712, (p_day - date '2000-01-01')::integer);

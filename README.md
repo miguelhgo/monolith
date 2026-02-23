@@ -61,6 +61,7 @@ Current migration list:
 
 - `supabase/migrations/20260216090000_initial_schema.sql`
 - `supabase/migrations/20260218163000_username_immutable.sql`
+- `supabase/migrations/20260223194000_pick_launch_gate.sql`
 
 ## Auth and username flow
 
@@ -90,6 +91,7 @@ The SQL schema includes:
 
 - `pick_daily_chosen(p_day, p_cooldown_days)`:
   - Picks one user for the day (random from eligible pool).
+  - Rejects days before launch date (DB-enforced gate).
   - Stores result in `daily_choices`.
   - Updates cooldown state in `selection_state`.
   - Execution is granted only to privileged backend key (run from backend/Edge Function/cron).
