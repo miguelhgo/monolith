@@ -24,7 +24,6 @@ export default function MonolithPage() {
     [launchDateIso]
   );
 
-  const [loaded, setLoaded] = useState(false);
   const [showAuthSheet, setShowAuthSheet] = useState(false);
   const [currentUtcDayIso, setCurrentUtcDayIso] = useState(() => getUtcDayIso());
   const hasLaunched = isLaunchLive(launchDateIso, currentUtcDayIso);
@@ -34,11 +33,6 @@ export default function MonolithPage() {
     sessionUserId: auth.session?.user.id,
     enabled: hasLaunched,
   });
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setLoaded(true), 50);
-    return () => window.clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -78,9 +72,6 @@ export default function MonolithPage() {
         style={{
           maxWidth: "760px",
           margin: "0 auto",
-          opacity: loaded ? 1 : 0,
-          transform: loaded ? "none" : "translateY(8px)",
-          transition: "opacity 0.35s ease, transform 0.35s ease",
         }}
       >
         <header

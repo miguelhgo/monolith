@@ -173,6 +173,27 @@ as $$
   from public.pool_entries;
 $$;
 
+create or replace function public.get_pool_rank(p_user_id uuid default auth.uid())
+returns bigint
+language sql
+security definer
+set search_path = public
+as $$
+  with target as (
+    select pe.position
+    from public.pool_entries pe
+    where pe.user_id = p_user_id
+  )
+  select case
+    when exists (select 1 from target) then (
+      select count(*)::bigint
+      from public.pool_entries pe
+      where pe.position <= (select position from target)
+    )
+    else null
+  end;
+$$;
+
 create or replace function public.pick_daily_chosen(
   p_day date default current_date,
   p_cooldown_days integer default 90
@@ -328,6 +349,9 @@ $$;
 
 revoke all on function public.get_waiting_count() from public;
 grant execute on function public.get_waiting_count() to anon, authenticated;
+
+revoke all on function public.get_pool_rank(uuid) from public;
+grant execute on function public.get_pool_rank(uuid) to authenticated;
 
 revoke all on function public.submit_monolith_post(date, text, text) from public;
 grant execute on function public.submit_monolith_post(date, text, text) to authenticated;

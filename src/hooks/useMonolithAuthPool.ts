@@ -132,28 +132,68 @@ export function useMonolithAuthPool() {
     const reservePoolPosition = async () => {
       setPoolLoading(true);
 
-      const { error: upsertError } = await supabase
+      const { data: existingEntry, error: existingEntryError } = await supabase
         .from("pool_entries")
-        .upsert({ user_id: userId }, { onConflict: "user_id", ignoreDuplicates: true });
+        .select("position")
+        .eq("user_id", userId)
+        .maybeSingle();
 
       if (cancelled) return;
-      if (upsertError) {
+      if (existingEntryError) {
         setAuthError("Couldn't reserve your pool position.");
         setPoolLoading(false);
         return;
       }
 
-      const { data: entry, error: entryError } = await supabase
-        .from("pool_entries")
-        .select("position")
-        .eq("user_id", userId)
-        .single();
+      let position = existingEntry?.position ?? null;
+
+      if (position === null) {
+        const { data: insertedEntry, error: insertError } = await supabase
+          .from("pool_entries")
+          .insert({ user_id: userId })
+          .select("position")
+          .single();
+
+        if (cancelled) return;
+        if (insertError && insertError.code !== "23505") {
+          setAuthError("Couldn't reserve your pool position.");
+          setPoolLoading(false);
+          return;
+        }
+
+        if (insertedEntry?.position !== undefined) {
+          position = insertedEntry.position;
+        }
+      }
+
+      if (position === null) {
+        const { data: entry, error: entryError } = await supabase
+          .from("pool_entries")
+          .select("position")
+          .eq("user_id", userId)
+          .single();
+
+        if (cancelled) return;
+        if (entryError) {
+          setAuthError("Couldn't read your pool position.");
+          setPoolLoading(false);
+          return;
+        }
+
+        position = entry.position;
+      }
+
+      const { data: rankData, error: rankError } = await supabase.rpc("get_pool_rank", {
+        p_user_id: userId,
+      });
 
       if (cancelled) return;
-      if (entryError) {
-        setAuthError("Couldn't read your pool position.");
+
+      const parsedRank = typeof rankData === "number" ? rankData : Number(rankData);
+      if (!rankError && Number.isFinite(parsedRank)) {
+        setPoolPosition(parsedRank);
       } else {
-        setPoolPosition(entry.position);
+        setPoolPosition(position);
       }
 
       setPoolLoading(false);

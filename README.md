@@ -62,6 +62,7 @@ Current migration list:
 - `supabase/migrations/20260216090000_initial_schema.sql`
 - `supabase/migrations/20260218163000_username_immutable.sql`
 - `supabase/migrations/20260223194000_pick_launch_gate.sql`
+- `supabase/migrations/20260223195500_pool_rank_rpc.sql`
 
 ## Auth and username flow
 
@@ -100,6 +101,8 @@ The SQL schema includes:
   - Enforces title/body minimums.
 - `get_chosen_for_day(p_day)`:
   - Public-safe read helper to get chosen user + username.
+- `get_pool_rank(p_user_id)`:
+  - Authenticated helper to return current queue rank without sequence gaps.
 
 ## Automation (daily pick)
 
