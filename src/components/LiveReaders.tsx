@@ -1,19 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { supabase } from "../lib/supabase";
 
 function formatNum(n: number) {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export default function LiveReaders() {
-  const [count, setCount] = useState(4329);
+  const [count, setCount] = useState<number | null>(null);
+  const channelRef = useRef<ReturnType<NonNullable<typeof supabase>["channel"]> | null>(null);
 
   useEffect(() => {
-    const i = setInterval(
-      () => setCount((c) => c + Math.floor(Math.random() * 7) - 3),
-      3000
-    );
-    return () => clearInterval(i);
+    if (!supabase) return;
+
+    const channel = supabase.channel("readers", {
+      config: { presence: { key: crypto.randomUUID() } },
+    });
+
+    channelRef.current = channel;
+
+    channel
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState();
+        let total = 0;
+        for (const key of Object.keys(state)) {
+          total += state[key].length;
+        }
+        setCount(total);
+      })
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({ online_at: new Date().toISOString() });
+        }
+      });
+
+    return () => {
+      channel.unsubscribe();
+      channelRef.current = null;
+    };
   }, []);
+
+  if (count === null) return null;
 
   return (
     <div

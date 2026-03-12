@@ -5,6 +5,10 @@ import {
   type ChosenInfo,
   type DailyPost,
 } from "../lib/monolith";
+import VoteButton from "./VoteButton";
+import LiveReaders from "./LiveReaders";
+import Comments from "./Comments";
+import type { CommentNode } from "../hooks/useComments";
 
 interface Props {
   hasLaunched: boolean;
@@ -28,6 +32,20 @@ interface Props {
   onDraftTitleChange: (value: string) => void;
   onDraftBodyChange: (value: string) => void;
   onSubmit: () => void;
+  // Comments & Votes
+  isLoggedIn: boolean;
+  currentUserId: string | null;
+  onLoginClick: () => void;
+  comments: CommentNode[];
+  commentsLoading: boolean;
+  commentsSubmitting: boolean;
+  onSubmitComment: (body: string, parentId: number | null) => Promise<boolean | undefined>;
+  onDeleteComment: (commentId: number) => Promise<boolean | undefined>;
+  onVote: (targetType: string, targetId: number, value: 1 | -1) => void;
+  getUserVote: (targetType: string, targetId: number) => number;
+  postId: number | null;
+  postVotesUp: number;
+  postVotesDown: number;
 }
 
 export default function DailyMonolithSection({
@@ -52,6 +70,19 @@ export default function DailyMonolithSection({
   onDraftTitleChange,
   onDraftBodyChange,
   onSubmit,
+  isLoggedIn,
+  currentUserId,
+  onLoginClick,
+  comments,
+  commentsLoading,
+  commentsSubmitting,
+  onSubmitComment,
+  onDeleteComment,
+  onVote,
+  getUserVote,
+  postId,
+  postVotesUp,
+  postVotesDown,
 }: Props) {
   if (!hasLaunched) {
     return (
@@ -105,6 +136,8 @@ export default function DailyMonolithSection({
     );
   }
 
+  const postVoteValue = postId !== null ? getUserVote("post", postId) : 0;
+
   return (
     <section
       style={{
@@ -115,18 +148,31 @@ export default function DailyMonolithSection({
         background: "#0f1219",
       }}
     >
-      <p
+      <div
         style={{
-          margin: "0 0 6px",
-          fontFamily: "'DM Mono', monospace",
-          textTransform: "uppercase",
-          letterSpacing: "0.8px",
-          fontSize: "10px",
-          color: "var(--accent-warm)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "8px",
+          marginBottom: "6px",
         }}
       >
-        Monolith day · {dayLabel} (UTC)
-      </p>
+        <p
+          style={{
+            margin: 0,
+            fontFamily: "'DM Mono', monospace",
+            textTransform: "uppercase",
+            letterSpacing: "0.8px",
+            fontSize: "10px",
+            color: "var(--accent-warm)",
+          }}
+        >
+          Monolith day · {dayLabel} (UTC)
+        </p>
+        <LiveReaders />
+      </div>
+
       <h2
         style={{
           margin: "0 0 10px",
@@ -259,6 +305,17 @@ export default function DailyMonolithSection({
           >
             {dailyPost.body}
           </p>
+          {postId !== null && (
+            <div style={{ marginTop: "12px" }}>
+              <VoteButton
+                votesUp={postVotesUp}
+                votesDown={postVotesDown}
+                currentUserVote={postVoteValue}
+                onVote={(value) => onVote("post", postId, value)}
+                size="lg"
+              />
+            </div>
+          )}
         </article>
       )}
 
@@ -394,6 +451,43 @@ export default function DailyMonolithSection({
                 ? "Update today's post"
                 : "Publish today's post"}
           </button>
+        </div>
+      )}
+
+      {/* Comments section — only show when launched and post exists */}
+      {hasLaunched && dailyPost && (
+        <div style={{ marginTop: "20px" }}>
+          <div
+            style={{
+              borderTop: "1px solid rgba(255,255,255,0.04)",
+              paddingTop: "16px",
+            }}
+          >
+            <h4
+              style={{
+                margin: "0 0 4px",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: "15px",
+                fontWeight: 600,
+                color: "var(--text-primary)",
+                letterSpacing: "-0.2px",
+              }}
+            >
+              Responses
+            </h4>
+            <Comments
+              comments={comments}
+              isLoggedIn={isLoggedIn}
+              currentUserId={currentUserId}
+              onLoginClick={onLoginClick}
+              onSubmitComment={onSubmitComment}
+              onDeleteComment={onDeleteComment}
+              onVote={onVote}
+              getUserVote={getUserVote}
+              loading={commentsLoading}
+              submitting={commentsSubmitting}
+            />
+          </div>
         </div>
       )}
     </section>

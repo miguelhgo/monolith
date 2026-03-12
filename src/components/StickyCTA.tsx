@@ -6,9 +6,15 @@ function formatNum(n: number) {
 
 interface Props {
   onLoginClick: () => void;
+  waitingCount: number | null;
+  isAuthenticated?: boolean;
 }
 
-export default function StickyCTA({ onLoginClick }: Props) {
+export default function StickyCTA({ onLoginClick, waitingCount, isAuthenticated }: Props) {
+  if (isAuthenticated) return null;
+
+  const displayCount = waitingCount ?? 0;
+
   return (
     <div
       style={{
@@ -45,7 +51,7 @@ export default function StickyCTA({ onLoginClick }: Props) {
             boxShadow: "0 10px 26px rgba(0,0,0,0.34)",
           }}
         >
-          <Sparkles size={16} /> Join the lottery &mdash; {formatNum(284019)}{" "}
+          <Sparkles size={16} /> Join the lottery &mdash; {formatNum(displayCount)}{" "}
           waiting
         </button>
         <p

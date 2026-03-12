@@ -1,20 +1,20 @@
 import { useState } from "react";
-import { ChevronRight, CornerDownRight, Plus } from "lucide-react";
+import { ChevronRight, CornerDownRight, Plus, Trash2, Loader2 } from "lucide-react";
 import VoteButton from "./VoteButton";
-
-interface CommentData {
-  id: number;
-  user: string;
-  time: string;
-  votes: number;
-  text: string;
-  replies: CommentData[];
-}
+import CommentInput from "./CommentInput";
+import type { CommentNode } from "../hooks/useComments";
 
 interface CommentsProps {
-  comments: CommentData[];
+  comments: CommentNode[];
   isLoggedIn: boolean;
+  currentUserId: string | null;
   onLoginClick: () => void;
+  onSubmitComment: (body: string, parentId: number | null) => Promise<boolean | undefined>;
+  onDeleteComment: (commentId: number) => Promise<boolean | undefined>;
+  onVote: (targetType: string, targetId: number, value: 1 | -1) => void;
+  getUserVote: (targetType: string, targetId: number) => number;
+  loading?: boolean;
+  submitting?: boolean;
 }
 
 const HASH_COLORS = [
@@ -31,34 +31,60 @@ function hashColor(name: string) {
 const MAX_DEPTH = 3;
 const COMMENT_TRUNCATE = 200;
 
-function countReplies(comment: CommentData): number {
+function countReplies(comment: CommentNode): number {
   let count = comment.replies.length;
   for (const r of comment.replies) count += countReplies(r);
   return count;
+}
+
+function formatTimeAgo(isoDate: string): string {
+  const now = Date.now();
+  const then = new Date(isoDate).getTime();
+  const diff = Math.max(0, now - then);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 }
 
 function Comment({
   comment,
   depth = 0,
   isLoggedIn,
+  currentUserId,
   onLoginClick,
+  onSubmitComment,
+  onDeleteComment,
+  onVote,
+  getUserVote,
 }: {
-  comment: CommentData;
+  comment: CommentNode;
   depth?: number;
   isLoggedIn: boolean;
+  currentUserId: string | null;
   onLoginClick: () => void;
+  onSubmitComment: (body: string, parentId: number | null) => Promise<boolean | undefined>;
+  onDeleteComment: (commentId: number) => Promise<boolean | undefined>;
+  onVote: (targetType: string, targetId: number, value: 1 | -1) => void;
+  getUserVote: (targetType: string, targetId: number) => number;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [showFull, setShowFull] = useState(false);
+  const [showReplyInput, setShowReplyInput] = useState(false);
   const threadColors = ["#e85d26", "#6366f1", "#10b981", "#f59e0b", "#ec4899"];
-  const userColor = hashColor(comment.user);
-  const isTruncated = comment.text.length > COMMENT_TRUNCATE && !showFull;
+  const userColor = hashColor(comment.username);
+  const isTruncated = comment.body.length > COMMENT_TRUNCATE && !showFull;
   const displayText = isTruncated
-    ? comment.text.slice(0, COMMENT_TRUNCATE).trim() + "\u2026"
-    : comment.text;
+    ? comment.body.slice(0, COMMENT_TRUNCATE).trim() + "\u2026"
+    : comment.body;
   const atMaxDepth = depth >= MAX_DEPTH;
   const hasDeepReplies = comment.replies.length > 0 && atMaxDepth;
   const totalNested = countReplies(comment);
+  const isOwn = currentUserId !== null && comment.user_id === currentUserId;
+  const currentVote = getUserVote("comment", comment.id);
 
   return (
     <div style={{ marginTop: depth === 0 ? "14px" : "6px" }}>
@@ -108,7 +134,7 @@ function Comment({
                 flexShrink: 0,
               }}
             >
-              {comment.user[0].toUpperCase()}
+              {comment.username[0].toUpperCase()}
             </div>
             <span
               style={{
@@ -118,7 +144,7 @@ function Comment({
                 color: userColor,
               }}
             >
-              {comment.user}
+              {comment.username}
             </span>
             <span
               style={{
@@ -127,7 +153,7 @@ function Comment({
                 fontFamily: "'DM Mono', monospace",
               }}
             >
-              {comment.time}
+              {formatTimeAgo(comment.created_at)}
             </span>
             {comment.replies.length > 0 && collapsed && (
               <button
@@ -190,28 +216,74 @@ function Comment({
                   marginTop: "5px",
                 }}
               >
-                <VoteButton votes={comment.votes} />
-                <button
-                  onClick={() => !isLoggedIn && onLoginClick()}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#3a3a46",
-                    fontSize: "11px",
-                    cursor: "pointer",
-                    fontFamily: "'DM Mono', monospace",
-                    padding: "4px 0",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    transition: "color 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#7a7a8a")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#3a3a46")}
-                >
-                  <CornerDownRight size={11} /> reply
-                </button>
+                <VoteButton
+                  votesUp={comment.votes_up}
+                  votesDown={comment.votes_down}
+                  currentUserVote={currentVote}
+                  onVote={(value) => onVote("comment", comment.id, value)}
+                />
+                {!atMaxDepth && (
+                  <button
+                    onClick={() => {
+                      if (!isLoggedIn) {
+                        onLoginClick();
+                      } else {
+                        setShowReplyInput(!showReplyInput);
+                      }
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#3a3a46",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      fontFamily: "'DM Mono', monospace",
+                      padding: "4px 0",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      transition: "color 0.2s",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#7a7a8a")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#3a3a46")}
+                  >
+                    <CornerDownRight size={11} /> reply
+                  </button>
+                )}
+                {isOwn && (
+                  <button
+                    onClick={() => onDeleteComment(comment.id)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#3a3a46",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      fontFamily: "'DM Mono', monospace",
+                      padding: "4px 0",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      transition: "color 0.2s",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#3a3a46")}
+                  >
+                    <Trash2 size={11} /> delete
+                  </button>
+                )}
               </div>
+
+              {showReplyInput && (
+                <CommentInput
+                  isLoggedIn={isLoggedIn}
+                  onLoginClick={onLoginClick}
+                  onSubmit={(body) => onSubmitComment(body, comment.id)}
+                  isReply
+                  placeholder={`Reply to ${comment.username}...`}
+                  onCancel={() => setShowReplyInput(false)}
+                />
+              )}
 
               {!atMaxDepth &&
                 comment.replies.map((reply) => (
@@ -220,7 +292,12 @@ function Comment({
                     comment={reply}
                     depth={depth + 1}
                     isLoggedIn={isLoggedIn}
+                    currentUserId={currentUserId}
                     onLoginClick={onLoginClick}
+                    onSubmitComment={onSubmitComment}
+                    onDeleteComment={onDeleteComment}
+                    onVote={onVote}
+                    getUserVote={getUserVote}
                   />
                 ))}
               {hasDeepReplies && (
@@ -263,14 +340,54 @@ function Comment({
   );
 }
 
-export default function Comments({ comments, isLoggedIn, onLoginClick }: CommentsProps) {
-  const [activeTab, setActiveTab] = useState("top");
+export default function Comments({
+  comments,
+  isLoggedIn,
+  currentUserId,
+  onLoginClick,
+  onSubmitComment,
+  onDeleteComment,
+  onVote,
+  getUserVote,
+  loading,
+  submitting,
+}: CommentsProps) {
+  const [activeTab, setActiveTab] = useState("new");
+
+  const sortedComments = [...comments].sort((a, b) => {
+    if (activeTab === "top") {
+      const aNet = a.votes_up - a.votes_down;
+      const bNet = b.votes_up - b.votes_down;
+      return bNet - aNet;
+    }
+    if (activeTab === "controversial") {
+      const aTotal = a.votes_up + a.votes_down;
+      const bTotal = b.votes_up + b.votes_down;
+      return bTotal - aTotal;
+    }
+    // "new" — newest first
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   return (
     <div>
-      {/* Sort tabs */}
-      <div style={{ display: "flex", gap: "4px", padding: "4px 0 8px" }}>
-        {["top", "new", "controversial"].map((tab) => (
+      {/* Comment input */}
+      <CommentInput
+        isLoggedIn={isLoggedIn}
+        onLoginClick={onLoginClick}
+        onSubmit={(body) => onSubmitComment(body, null)}
+      />
+
+      {/* Sort tabs + comment count */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+          padding: "4px 0 8px",
+        }}
+      >
+        {["new", "top", "controversial"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -296,16 +413,52 @@ export default function Comments({ comments, isLoggedIn, onLoginClick }: Comment
             {tab}
           </button>
         ))}
+        {loading && (
+          <Loader2
+            size={12}
+            style={{ animation: "spin 1s linear infinite", color: "#3a3a46", marginLeft: "4px" }}
+          />
+        )}
+        {submitting && (
+          <span
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "10px",
+              color: "#e85d26",
+              marginLeft: "4px",
+            }}
+          >
+            posting...
+          </span>
+        )}
       </div>
 
       {/* Comments list */}
       <div style={{ padding: "4px 0 40px" }}>
-        {comments.map((comment) => (
+        {sortedComments.length === 0 && !loading && (
+          <p
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "12px",
+              color: "#3a3a46",
+              textAlign: "center",
+              padding: "20px 0",
+            }}
+          >
+            No comments yet. Be the first to respond.
+          </p>
+        )}
+        {sortedComments.map((comment) => (
           <Comment
             key={comment.id}
             comment={comment}
             isLoggedIn={isLoggedIn}
+            currentUserId={currentUserId}
             onLoginClick={onLoginClick}
+            onSubmitComment={onSubmitComment}
+            onDeleteComment={onDeleteComment}
+            onVote={onVote}
+            getUserVote={getUserVote}
           />
         ))}
       </div>

@@ -4,10 +4,17 @@ function formatNum(n: number) {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-export default function LotteryTicket() {
-  const num = 184293;
-  const total = 284019;
-  const chance = ((1 / total) * 100).toFixed(4);
+interface Props {
+  poolPosition: number | null;
+  poolTotal: number | null;
+  username: string | null;
+}
+
+export default function LotteryTicket({ poolPosition, poolTotal, username }: Props) {
+  // Only render when user is in the pool
+  if (poolPosition === null || poolTotal === null || !username) return null;
+
+  const chance = poolTotal > 0 ? ((1 / poolTotal) * 100).toFixed(4) : "0.0000";
 
   return (
     <div
@@ -45,7 +52,7 @@ export default function LotteryTicket() {
               color: "#fff",
             }}
           >
-            #{formatNum(num)}
+            #{formatNum(poolPosition)}
           </div>
         </div>
       </div>
@@ -66,7 +73,7 @@ export default function LotteryTicket() {
             color: "#3a3a46",
           }}
         >
-          {formatNum(total)} in the pool
+          {formatNum(poolTotal)} in the pool
         </div>
       </div>
     </div>
