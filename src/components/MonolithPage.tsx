@@ -252,11 +252,13 @@ export default function MonolithPage() {
       </main>
 
       {/* Sticky CTA — only for unauthenticated */}
-      <StickyCTA
-        onLoginClick={openAuthSheet}
-        waitingCount={auth.waitingCount}
-        isAuthenticated={isLoggedIn}
-      />
+      {hasLaunched && (
+        <StickyCTA
+          onLoginClick={openAuthSheet}
+          waitingCount={auth.waitingCount}
+          isAuthenticated={isLoggedIn}
+        />
+      )}
 
       <AuthSheetModal
         open={showAuthSheet && !auth.session}
