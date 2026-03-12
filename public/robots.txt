@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://monolith.mighs.me/sitemap.xml

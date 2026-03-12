@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { Share2, X, Check, Link2 } from "lucide-react";
 
-export default function ShareModal() {
+interface ShareModalProps {
+  title?: string;
+  postAuthor?: string;
+}
+
+export default function ShareModal({ title, postAuthor }: ShareModalProps) {
   const [show, setShow] = useState(false);
   const [copied, setCopied] = useState(false);
-  const url = "https://themonolith.today";
+  const url = "https://monolith.mighs.me";
   const text =
-    "Today's monolith hit different. One chosen voice, one day, gone forever.";
+    title && postAuthor
+      ? `Today's monolith by @${postAuthor}: "${title}" — Read it before it disappears. ${url}`
+      : "Today's monolith hit different. One chosen voice, one day, gone forever.";
 
   const copyLink = () => {
     navigator.clipboard?.writeText(url);

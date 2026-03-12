@@ -1,0 +1,16 @@
+{
+  "name": "monolith",
+  "short_name": "monolith",
+  "description": "One person is chosen every day. Their words disappear in 24 hours.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#08080c",
+  "background_color": "#08080c",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

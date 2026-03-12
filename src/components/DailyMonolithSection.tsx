@@ -6,6 +6,7 @@ import {
   type DailyPost,
 } from "../lib/monolith";
 import VoteButton from "./VoteButton";
+import ShareModal from "./ShareModal";
 import LiveReaders from "./LiveReaders";
 import Comments from "./Comments";
 import type { CommentNode } from "../hooks/useComments";
@@ -306,13 +307,17 @@ export default function DailyMonolithSection({
             {dailyPost.body}
           </p>
           {postId !== null && (
-            <div style={{ marginTop: "12px" }}>
+            <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "10px" }}>
               <VoteButton
                 votesUp={postVotesUp}
                 votesDown={postVotesDown}
                 currentUserVote={postVoteValue}
                 onVote={(value) => onVote("post", postId, value)}
                 size="lg"
+              />
+              <ShareModal
+                title={dailyPost.title}
+                postAuthor={chosenInfo?.username ?? undefined}
               />
             </div>
           )}

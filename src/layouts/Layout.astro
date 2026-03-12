@@ -26,6 +26,11 @@ const ogImage = image.startsWith("http")
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#08080c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="monolith" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="canonical" href={pageUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="monolith" />
@@ -97,6 +102,7 @@ const ogImage = image.startsWith("http")
       })();
     </script>
     <title>{title}</title>
+    <script defer data-domain="monolith.mighs.me" src="https://plausible.io/js/script.js"></script>
   </head>
   <body class="min-h-screen bg-mono-bg text-mono-text-primary">
     <slot />
